@@ -45,12 +45,14 @@ data = r.json()
 
 token = data['query']['tokens']['csrftoken']
 
-string = ""
+string = "Testing\n\n"  # Your new text to prepend (with newlines after)
+
+page_title = "Harry_anush_CAS_CI"
 
 edit = session.post(API, data={
     "action": "edit",
-    "title": "Harry_anush_CAS_CI",
-    "text": string,
+    "title": page_title,
+    "prependtext": string,
     "token": token,
     "format": "json"
 }, verify=False)
