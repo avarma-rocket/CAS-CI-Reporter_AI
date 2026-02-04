@@ -1,16 +1,31 @@
+import os
+from dotenv import load_dotenv
 import requests
 from requests_ntlm import HttpNtlmAuth
 import urllib3
 
 urllib3.disable_warnings()
+load_dotenv('secrets.env')
 
-API = "https://nwb-devwiki.dev.rocketsoftware.com/api.php"
+
+API = os.environ['MEDIAWIKI_API_URL']
 
 session = requests.Session()
 
+# Load environment variables from secrets.env
+
+login = os.environ['MEDIAWIKI_DOMAIN_LOGIN'].strip().replace('\\\\', '\\')
+password = os.environ['MEDIAWIKI_DOMAIN_PASSWORD'].strip()
+
+print("Loaded login:", repr(login))
+print("Loaded password length:", len(password))
+
 # Use NTLM authentication with your Windows credentials
 # Replace with your actual domain\username and password
-session.auth = HttpNtlmAuth('MEDIAWIKI_DOMAIN_LOGIN', 'MEDIAWIKI_DOMAIN_PASSWORD')
+session.auth = HttpNtlmAuth(
+    login,
+    password
+)
 
 # Set a proper User-Agent header (required by many MediaWiki installations)
 session.headers.update({
