@@ -87,6 +87,18 @@ echo Uploading results to MediaWiki...
 echo ============================================================
 call %VENV_DIR%\python.exe %BASE_DIR%\mediawikiChat.py
 
+:: Clean up generated reports
+echo.
+echo ============================================================
+echo Cleaning up generated reports...
+echo ============================================================
+if exist "%BASE_DIR%\reports\*.md" (
+    del /q "%BASE_DIR%\reports\*.md"
+    echo Deleted report files from %BASE_DIR%\reports
+) else (
+    echo No report files to delete.
+)
+
 echo Deactivating virtualenv...
 call %VENV_DIR%\deactivate.bat
 

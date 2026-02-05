@@ -10,9 +10,8 @@ TODAY_UNDERSCORE = datetime.now().strftime("%Y_%m_%d")
 # Ensure reports directory exists
 os.makedirs(REPORTS_DIR, exist_ok=True)
 
-NEW_CI_FILE = os.path.join(REPORTS_DIR, f"CI_Status_Results_{TODAY}.md")
-OLD_CI_FILE = os.path.join(REPORTS_DIR, f"OldCI_Status_Results_{TODAY}.md")
-COMBINED_FILE = os.path.join(REPORTS_DIR, f"CI_Combined_Results_{TODAY_UNDERSCORE}.md")
+# Report types to process
+REPORT_TYPES = ['CONF', 'FULL', 'IPIC', 'PAC', 'PRIVATE', 'WEEKEND']
 
 # Platform name mappings (normalize to lowercase keys)
 PLATFORM_MAP = {
@@ -29,7 +28,7 @@ def read_file(filepath):
     return ""
 
 def parse_matrix_simple(content):
-    """Simpler parsing approach for the matrix."""
+    """Parse the results matrix, handling both | and ! prefixed values."""
     results = {}
     versions = []
     current_platform = None
@@ -64,14 +63,26 @@ def parse_matrix_simple(content):
         if in_matrix and "|}" in line:
             break
         if not in_matrix or line.strip() == '|-':
+            current_platform = None  # Reset platform on row separator
             continue
         
-        if line.startswith('!') and 'Platform' not in line and 'Total' not in line:
-            platform_raw = line[1:].strip().lower()
-            current_platform = PLATFORM_MAP.get(platform_raw, platform_raw)
-            results[current_platform] = {}
-        elif line.startswith('|') and current_platform and '|-' not in line and '|}' not in line:
-            cell = line[1:].strip()
+        stripped = line.strip()
+        
+        # Check if this is a platform row (starts with ! and is a known platform)
+        if stripped.startswith('!') and 'Platform' not in stripped and 'Total' not in stripped:
+            platform_raw = stripped[1:].strip().lower()
+            normalized = PLATFORM_MAP.get(platform_raw, platform_raw)
+            # Only treat as platform if it matches known platforms
+            if normalized in ['rh-x64', 'rh-x86', 'win-x64', 'win-x86']:
+                current_platform = normalized
+                results[current_platform] = {}
+                continue
+        
+        # Data cell - can start with | or ! (! indicates failure count)
+        if current_platform and (stripped.startswith('|') or stripped.startswith('!')):
+            if '|-' in stripped or '|}' in stripped:
+                continue
+            cell = stripped[1:].strip()
             idx = len(results[current_platform])
             if idx < len(versions):
                 results[current_platform][versions[idx]] = cell
@@ -111,9 +122,19 @@ def parse_failure_list(content):
     
     return failures
 
-def combine_files():
-    new_ci = read_file(NEW_CI_FILE)
-    old_ci = read_file(OLD_CI_FILE)
+def combine_files_for_type(report_type):
+    """Combine CI and OldCI files for a specific report type."""
+    new_ci_file = os.path.join(REPORTS_DIR, f"CI_Status_Results_{report_type}_{TODAY}.md")
+    old_ci_file = os.path.join(REPORTS_DIR, f"OldCI_Status_Results_{report_type}_{TODAY}.md")
+    combined_file = os.path.join(REPORTS_DIR, f"CI_Combined_Results_{report_type}_{TODAY_UNDERSCORE}.md")
+    
+    # Check if new CI file exists (required)
+    if not os.path.exists(new_ci_file):
+        print(f"Skipping {report_type}: No CI_Status_Results_{report_type}_{TODAY}.md found")
+        return False
+    
+    new_ci = read_file(new_ci_file)
+    old_ci = read_file(old_ci_file)  # May be empty if file doesn't exist
     
     new_results, new_versions = parse_matrix_simple(new_ci)
     old_results, old_versions = parse_matrix_simple(old_ci)
@@ -122,8 +143,15 @@ def combine_files():
     new_failures = parse_failure_list(new_ci)
     old_failures = parse_failure_list(old_ci)
     
-    # Define output columns order
-    all_versions = ['PAC/trunk_tip', 'PAC/ED11.0_tip', 'ED10.0', 'ED9.0', 'ED8.0']
+    # Combine versions dynamically: new CI versions first, then old CI versions (no duplicates)
+    all_versions = []
+    for v in new_versions:
+        if v not in all_versions:
+            all_versions.append(v)
+    for v in old_versions:
+        if v not in all_versions:
+            all_versions.append(v)
+    
     platforms = ['rh-x64', 'rh-x86', 'win-x64', 'win-x86']
     
     def get_value(platform, version):
@@ -135,34 +163,86 @@ def combine_files():
     
     def calc_total(platform):
         vals = [get_value(platform, v) for v in all_versions]
-        fails = sum(1 for v in vals if v.isdigit() and int(v) > 0)
-        if fails > 0:
-            return str(sum(int(v) for v in vals if v.isdigit()))
+        # Sum numeric values
+        numeric_sum = 0
+        has_numeric = False
+        for v in vals:
+            try:
+                num = int(v)
+                if num > 0:
+                    numeric_sum += num
+                    has_numeric = True
+            except ValueError:
+                pass
+        if has_numeric:
+            return str(numeric_sum)
         return 'P' if all(v in ('P', '~') for v in vals) else '?'
     
-    output = f"""<!-- filepath: {COMBINED_FILE} -->
-=={TODAY} PAC Combined Results (Harry Morley)==
+    # Build header with dynamic versions
+    output = f"""<!-- filepath: {combined_file} -->
+=={TODAY} {report_type} Combined Results (Harry Morley)==
 ===Results Matrix===
 {{| class="wikitable"
 |-
 !Platform/Version
-!PAC/trunk_tip
-!PAC/ED11.0_tip
-!ED10.0
-!ED9.0
-!ED8.0
-!Total
 """
+    for v in all_versions:
+        output += f"!{v}\n"
+    output += "!Total\n"
     
     for platform in platforms:
         vals = [get_value(platform, v) for v in all_versions]
         total = calc_total(platform)
         output += f"|-\n!{platform}\n"
         for v in vals:
-            marker = '!' if v.isdigit() and int(v) > 0 else '|'
+            try:
+                marker = '!' if int(v) > 0 else '|'
+            except ValueError:
+                marker = '|'
             output += f"{marker}{v}\n"
-        total_marker = '!' if total.isdigit() and int(total) > 0 else '|'
+        try:
+            total_marker = '!' if int(total) > 0 else '|'
+        except ValueError:
+            total_marker = '|'
         output += f"{total_marker}{total}\n"
+    
+    # Add Total row
+    def calc_version_total(version):
+        """Calculate total for a specific version across all platforms."""
+        total_sum = 0
+        has_numeric = False
+        for platform in platforms:
+            val = get_value(platform, version)
+            try:
+                num = int(val)
+                if num > 0:
+                    total_sum += num
+                    has_numeric = True
+            except ValueError:
+                pass
+        if has_numeric:
+            return str(total_sum)
+        return 'P' if all(get_value(p, version) in ('P', '~') for p in platforms) else '?'
+    
+    output += "|-\n!Total\n"
+    grand_total = 0
+    has_grand_numeric = False
+    for v in all_versions:
+        ver_total = calc_version_total(v)
+        try:
+            marker = '!' if int(ver_total) > 0 else '|'
+            grand_total += int(ver_total)
+            has_grand_numeric = True
+        except ValueError:
+            marker = '|'
+        output += f"{marker}{ver_total}\n"
+    
+    # Grand total (sum of all version totals)
+    if has_grand_numeric:
+        grand_marker = '!' if grand_total > 0 else '|'
+        output += f"{grand_marker}{grand_total}\n"
+    else:
+        output += "|P\n"
     
     output += "|}\n"
     
@@ -199,10 +279,25 @@ PLEASE MODIFY THIS WITH THE REQUIRED HIGHLIGHTS
     
     output += "|}\n"
     
-    with open(COMBINED_FILE, 'w', encoding='utf-8') as f:
+    with open(combined_file, 'w', encoding='utf-8') as f:
         f.write(output)
     
-    print(f"Combined results written to: {COMBINED_FILE}")
+    print(f"Combined results written to: {combined_file}")
+    return True
+
+def combine_files():
+    """Process all report types."""
+    print(f"Processing reports for date: {TODAY}")
+    print(f"Looking in directory: {REPORTS_DIR}")
+    print("-" * 50)
+    
+    processed = 0
+    for report_type in REPORT_TYPES:
+        if combine_files_for_type(report_type):
+            processed += 1
+    
+    print("-" * 50)
+    print(f"Processed {processed} report type(s)")
 
 if __name__ == "__main__":
     combine_files()
