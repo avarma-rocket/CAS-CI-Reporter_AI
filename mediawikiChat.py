@@ -45,14 +45,17 @@ data = r.json()
 
 token = data['query']['tokens']['csrftoken']
 
-string = "Testing\n\n"  # Your new text to prepend (with newlines after)
+# Read the combined results from the MD file
+md_file_path = os.path.join(os.path.dirname(__file__), 'reports', 'CI_Combined_Results_2026_02_05.md')
+with open(md_file_path, 'r', encoding='utf-8') as f:
+    results_table = f.read() + "\n\n"
 
 page_title = "Harry_anush_CAS_CI"
 
 edit = session.post(API, data={
     "action": "edit",
     "title": page_title,
-    "prependtext": string,
+    "prependtext": results_table,
     "token": token,
     "format": "json"
 }, verify=False)
