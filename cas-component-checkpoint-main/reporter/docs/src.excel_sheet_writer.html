@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Python: module excel_sheet_writer</title>
+</head><body>
+
+<table class="heading">
+<tr class="heading-text decor">
+<td class="title">&nbsp;<br><strong class="title">excel_sheet_writer</strong></td>
+<td class="extra"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cjholt2%5Cdocuments%5Csources%5Cjacksvn%5Cjenkins_reporter%5Ctrunk%5Csrc%5Cexcel_sheet_writer.py">c:\users\jholt2\documents\sources\jacksvn\jenkins_reporter\trunk\src\excel_sheet_writer.py</a></td></tr></table>
+    <p></p>
+<p>
+<table class="section">
+<tr class="decor pkg-content-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Modules</strong></td></tr>
+    
+<tr><td class="decor pkg-content-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><table><tr><td class="multicolumn"><a href="openpyxl.html">openpyxl</a><br>
+</td><td class="multicolumn"><a href="openpyxl.styles.html">openpyxl.styles</a><br>
+</td><td class="multicolumn"></td><td class="multicolumn"></td></tr></table></td></tr></table><p>
+<table class="section">
+<tr class="decor index-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Classes</strong></td></tr>
+    
+<tr><td class="decor index-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><dl>
+<dt class="heading-text"><a href="builtins.html#object">builtins.object</a>
+</dt><dd>
+<dl>
+<dt class="heading-text"><a href="excel_sheet_writer.html#ExcelResultsWrapper">ExcelResultsWrapper</a>
+</dt></dl>
+</dd>
+</dl>
+ <p>
+<table class="section">
+<tr class="decor title-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><a name="ExcelResultsWrapper">class <strong>ExcelResultsWrapper</strong></a>(<a href="builtins.html#object">builtins.object</a>)</td></tr>
+    
+<tr><td class="decor title-decor" rowspan=2><span class="code">&nbsp;&nbsp;&nbsp;</span></td>
+<td class="decor title-decor" colspan=2><span class="code"><a href="#ExcelResultsWrapper">ExcelResultsWrapper</a>(file_name:&nbsp;str)<br>
+&nbsp;<br>
+<a href="#ExcelResultsWrapper">ExcelResultsWrapper</a>(file_name)<br>
+&nbsp;<br>
+A&nbsp;class&nbsp;that&nbsp;hooks&nbsp;into&nbsp;Excel&nbsp;which&nbsp;provides&nbsp;methods&nbsp;to&nbsp;build<br>
+results&nbsp;tables&nbsp;for&nbsp;Jenkins&nbsp;jobs.<br>
+&nbsp;<br>
+file_name:&nbsp;str&nbsp;-&nbsp;The&nbsp;name&nbsp;of&nbsp;the&nbsp;Excel&nbsp;workbook&nbsp;you&nbsp;wish&nbsp;to&nbsp;create.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;This&nbsp;does&nbsp;not&nbsp;include&nbsp;the&nbsp;.xlsx&nbsp;file&nbsp;extension,&nbsp;the<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;class&nbsp;appends&nbsp;the&nbsp;file&nbsp;extension&nbsp;when&nbsp;saving&nbsp;the&nbsp;file<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;automatically.<br>&nbsp;</span></td></tr>
+<tr><td>&nbsp;</td>
+<td class="singlecolumn">Methods defined here:<br>
+<dl><dt><a name="ExcelResultsWrapper-__init__"><strong>__init__</strong></a>(self, file_name: str)</dt><dd><span class="code">Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</span></dd></dl>
+
+<dl><dt><a name="ExcelResultsWrapper-build_branch_results_table"><strong>build_branch_results_table</strong></a>(self, branch_results: list, location: openpyxl.cell.cell.Cell) -&gt; openpyxl.cell.cell.Cell</dt></dl>
+
+<dl><dt><a name="ExcelResultsWrapper-build_excel_report"><strong>build_excel_report</strong></a>(self, results: list)</dt></dl>
+
+<dl><dt><a name="ExcelResultsWrapper-scan_and_merge"><strong>scan_and_merge</strong></a>(self, rows_to_check: int, starting_cell: openpyxl.cell.cell.Cell)</dt></dl>
+
+<dl><dt><a name="ExcelResultsWrapper-style_cells"><strong>style_cells</strong></a>(self, starting_cell: openpyxl.cell.cell.Cell, table_width: int, table_height: int)</dt></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><span class="code">dictionary&nbsp;for&nbsp;instance&nbsp;variables</span></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><span class="code">list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object</span></dd>
+</dl>
+</td></tr></table></td></tr></table>
+</body></html>
