@@ -46,7 +46,28 @@ data = r.json()
 token = data['query']['tokens']['csrftoken']
 
 # Read the combined results from the MD file
-md_file_path = os.path.join(os.path.dirname(__file__), 'reports', 'CI_Combined_Results_2026_02_05.md')
+# Find the most recent CI_Combined_Results file in the reports directory
+import glob
+from datetime import datetime
+
+reports_dir = os.path.join(os.path.dirname(__file__), 'reports')
+combined_patterns = [
+    os.path.join(reports_dir, 'CI_Combined_Results*.md'),
+    os.path.join(reports_dir, 'CI_Combined*.md'),
+]
+
+# Find all matching files
+matching_files = []
+for pattern in combined_patterns:
+    matching_files.extend(glob.glob(pattern))
+
+if not matching_files:
+    raise FileNotFoundError(f"No combined results file found in {reports_dir}")
+
+# Use the most recently modified file
+md_file_path = max(matching_files, key=os.path.getmtime)
+print(f"Using combined results file: {md_file_path}")
+
 with open(md_file_path, 'r', encoding='utf-8') as f:
     results_table = f.read() + "\n\n"
 

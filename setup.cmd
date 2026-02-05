@@ -6,7 +6,7 @@ set VIRTUALENV_DIR=%CD%\venv\Scripts
 
 :: Make new virtualenv
 echo "Creating new virtualenv for the project..."
-py -m venv venv
+python -m venv venv
 
 echo "Activating virtualenv..."
 call %VIRTUALENV_DIR%\activate.bat
