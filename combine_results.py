@@ -21,6 +21,13 @@ PLATFORM_MAP = {
     'win-x86': 'win-x86', 'win_32': 'win-x86',
 }
 
+def extract_title(content):
+    """Extract the title line from the report (e.g., '==2026-02-06 CONF (John Doe)==')."""
+    match = re.search(r'(==.+==)', content)
+    if match:
+        return match.group(1)
+    return None
+
 def read_file(filepath):
     if os.path.exists(filepath):
         with open(filepath, 'r', encoding='utf-8') as f:
@@ -136,6 +143,14 @@ def combine_files_for_type(report_type):
     new_ci = read_file(new_ci_file)
     old_ci = read_file(old_ci_file)  # May be empty if file doesn't exist
     
+    # Extract title from original report and modify for combined results
+    original_title = extract_title(new_ci) or extract_title(old_ci)
+    if original_title:
+        # Replace the report type with "Combined Results" version
+        combined_title = re.sub(r'(==\d{4}-\d{2}-\d{2})\s+\w+', f'\\1 {report_type} Combined Results', original_title)
+    else:
+        combined_title = f"=={TODAY} {report_type} Combined Results=="
+    
     new_results, new_versions = parse_matrix_simple(new_ci)
     old_results, old_versions = parse_matrix_simple(old_ci)
     
@@ -180,7 +195,7 @@ def combine_files_for_type(report_type):
     
     # Build header with dynamic versions
     output = f"""<!-- filepath: {combined_file} -->
-=={TODAY} {report_type} Combined Results (Harry Morley)==
+{combined_title}
 ===Results Matrix===
 {{| class="wikitable"
 |-

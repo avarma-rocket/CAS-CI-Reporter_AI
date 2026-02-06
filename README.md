@@ -24,14 +24,12 @@ Create two text files in the project root directory containing your Jenkins API 
 Open a terminal in the project root directory and run:
 
 ```cmd
-python -m venv venv
-.\venv\Scripts\activate
-pip install -r requirements.txt
+.\setup.cmd
 ```
 
 ### 3. Configure Environment
 
-Create or update the `secrets.env` file in the project root with your MediaWiki credentials:
+Create a `secrets.env` file in the project root with your MediaWiki credentials:
 
 ```env
 MEDIAWIKI_API_URL=https://nwb-devwiki.dev.rocketsoftware.com/api.php
