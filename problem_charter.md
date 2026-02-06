@@ -24,11 +24,11 @@ Makes test logs and results instantly accessible; removes repetitive manual upda
 - **Access time reduced**: Stakeholders can access latest results within minutes of job completion.
 
 ## Stakeholder Communication & Brainstorming
-We decided to hold a meeting with our stake holder as we initially had some questions about the project as we were unfamilliar with the tooling. 
+We decided to hold a meeting with our stakeholder as we initially had some questions about the project as we were unfamilliar with the tooling. 
 
-This meeting also helped us gain a starting plan for the order of features we would implement
+This meeting also helped us gain a starting plan for the order of features we would implement.
 
-There was a clear path for undertaking the project so there wasnt much brainstorming needed. Once we had access to the reporter tool we used GitHub Copilot inside of VS Code to gain some information about it.
+There was a clear path for undertaking the project so there wasn't much brainstorming needed. Once we had access to the reporter tool we used GitHub Copilot inside of VS Code to gain some information about it.
 
 | Prompt | Did it help? |
 |--------|--------------|
@@ -62,7 +62,7 @@ Project outline: Extend the existing reporter tool so that test results are auto
 ### Implementation
 The tool we were building from was split into two seperate projects. One takes the test results from the old Jenkins CI server and the second takes from the newer Jenkins CI server. One of the main objectives was to combine the two so that one command run would collect both test results. 
 
-Both programs are ran but runnin the run_reporter.cmd script which sets up the virtual environment and calls the respecitve jenkins_reporter.py program. Because of this it was easy to edit one of the scripts to call both reporters one after the other. GitHub Copilot was used to assist this using the following prompts:
+Both programs are run by running the run_reporter.cmd script which sets up the virtual environment and calls the respecitve jenkins_reporter.py program. Because of this it was easy to edit one of the scripts to call both reporters one after the other. GitHub Copilot was used to assist this using the following prompts:
 
 |Prompt (Claude Opus 4.5)|Notes|
 |-|-|
@@ -85,3 +85,19 @@ Next we needed to combine the generated files into a single report. As there wer
 |in the reports directory is every variation of report change combine_results.py to allow for these different types. Each report should be combined with it matching OldCI version|This did exactly what we needed it to however we noticed that some of the values werent being preserved which was a major issue|
 |make sure the exact values in the uncombined files are preserved in the combined file|This updated the combine_results.py to dynamically parse the reports instead of fill a template however this still did not preserve the exact values|
 |the values are still not being preserved as there are numbers in the original and only letters in the combined|After being more specific with what we needed to be preserved it was able acheive what we needed|
+
+
+After combining both scripts, we generated a new script which would take the output of combine_results.py and upload the dev.wiki. The script requires a secrets.env which contains three entries: 
+    - MEDIAWIKI_API_URL
+    - MEDIAWIKI_DOMAIN_LOGIN
+    - MEDIAWIKI_DOMAIN_PASSWORD
+
+Where the API_URL is the URL to the dev wiki api and the login and password are the user's rocketsfotware user and password. 
+
+We used GitHub Copilot to create the api calls and script to the wiki to edit a page. We included a link to the dev wiki documentation to provide refernece and examples for how to code.
+
+|Prompts (Claude Opus 4.5)|Notes|
+|-|-|
+|Extend the existing reporter tool so that test results are automatically published to the wiki via CI, including checking checksums to know if it is a previous failure, and suggestions from previous results. Jenkins would automatically trigger the reporter upon job completion and use stored secrets for authentication. Value: Makes test logs and results instantly accessible; removes repetitive manual updates; improves consistency across CI runs.| This prompt generated a good template with parts to fillout to enter the correct url and login and password. However it had hardcoded login details inside the code.|
+|Ive added MEDIAWIKI_DOMAIN_LOGIN and MEDIAWIKI_DOMAIN_PASSWORD into my secrets.env how can i reference them in my code| This prompt was concise and specifc therefore was carried out correctly. It used os python library to use env variables. However it was not parsing the username correctly because of additional backslashes not being added eg. rocketsoftware.com \\\\\\\\ avarma having 2 extra \|
+|rocketsoftware.com\\\\avarma has 2 extra \ |Giving this simple prompt solved the problem quicky with minimal code changes.|
