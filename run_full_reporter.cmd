@@ -85,7 +85,7 @@ echo.
 echo ============================================================
 echo Uploading results to MediaWiki...
 echo ============================================================
-call %VENV_DIR%\python.exe %BASE_DIR%\mediawikiChat.py
+call %VENV_DIR%\python.exe %BASE_DIR%\upload_wiki.py
 
 :: Clean up generated reports
 echo.
